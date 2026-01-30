@@ -4,24 +4,64 @@ import toast from "react-hot-toast"
 import Loader from "../components/Loader"
 import UserModal from "./UserModal"
 
+const PAGE_SIZE = 100
+
 export default function Users() {
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any | null>(null)
+  const [searchEmail, setSearchEmail] = useState("")
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
 
-  async function load() {
-    setLoading(true)
+  async function load(isNewSearch = false) {
+    if (isNewSearch) {
+      setLoading(true)
+      setPage(0)
+    } else {
+      setLoadingMore(true)
+    }
+
     try {
-      const { data, error } = await supabase
+      const currentPage = isNewSearch ? 0 : page
+      const from = currentPage * PAGE_SIZE
+      const to = from + PAGE_SIZE - 1
+
+      let query = supabase
         .from("profiles")
         .select("id, email, name, balance")
+        .range(from, to)
+        .order('email', { ascending: true })
+
+      if (searchEmail.trim()) {
+        query = query.ilike("email", `%${searchEmail.trim()}%`)
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
-      setUsers(data || [])
+
+      if (isNewSearch) {
+        setUsers(data || [])
+      } else {
+        setUsers(prev => [...prev, ...(data || [])])
+      }
+
+      // If we got fewer results than the page size, we reached the end
+      setHasMore(data?.length === PAGE_SIZE)
+      
+      if (!isNewSearch) {
+        setPage(currentPage + 1)
+      } else {
+        setPage(1)
+      }
+
     } catch (err: any) {
       toast.error(err.message || "Failed to load users.")
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }
 
@@ -43,7 +83,8 @@ export default function Users() {
       if (error) throw error
 
       toast.success("User deleted successfully")
-      await load()
+      // Reset and reload to ensure list is accurate
+      await load(true)
     } catch (err: any) {
       toast.error(err.message || "Failed to delete user")
     } finally {
@@ -52,8 +93,15 @@ export default function Users() {
   }
 
   useEffect(() => {
-    load()
+    load(true)
   }, [])
+
+  // Trigger search when user presses Enter or clears the field
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      load(true)
+    }
+  }
 
   if (loading && users.length === 0) return <Loader />
 
@@ -63,18 +111,38 @@ export default function Users() {
         <UserModal
           user={selectedUser}
           close={() => setSelectedUser(null)}
-          reload={load}
+          reload={() => load(true)}
         />
       )}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-        <button
-          onClick={load}
-          className="text-sm bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg w-full sm:w-auto transition"
-        >
-          Refresh List
-        </button>
+        
+        <div className="flex w-full sm:w-auto gap-2">
+          <input 
+            type="text"
+            placeholder="Search by email..."
+            className="text-sm border border-gray-300 rounded-lg px-4 py-2 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchEmail}
+            onChange={(e) => setSearchEmail(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+          />
+          <button
+            onClick={() => load(true)}
+            className="text-sm bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+          >
+            Search
+          </button>
+          <button
+            onClick={() => {
+              setSearchEmail("");
+              load(true);
+            }}
+            className="text-sm bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg transition"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -125,6 +193,18 @@ export default function Users() {
           </table>
         </div>
       </div>
+
+      {hasMore && users.length > 0 && (
+        <div className="mt-6 flex justify-center pb-10">
+          <button
+            onClick={() => load(false)}
+            disabled={loadingMore}
+            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow-sm transition disabled:opacity-50"
+          >
+            {loadingMore ? "Loading..." : "Load More Users"}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
