@@ -43,10 +43,16 @@ export default function ProductModal({ product, close, reload }: ProductModalPro
       } else {
         query = supabase.from("products").insert(payload)
       }
-
+      const token = `?lz5w<eJ)skBGJSE'4Twu[56_gL0M"sUzIC<q£{Fe0l3"3/xS#`;
       const { error } = await query
       if (error) throw error
-
+      await fetch("https://square-coffee-cache.squarecoffeedem.workers.dev/", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
       toast.success(product ? "Product updated" : "Product added")
       reload()
       close()
