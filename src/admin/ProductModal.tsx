@@ -46,7 +46,7 @@ export default function ProductModal({ product, close, reload }: ProductModalPro
       const token = `?lz5w<eJ)skBGJSE'4Twu[56_gL0M"sUzIC<q£{Fe0l3"3/xS#`;
       const { error } = await query
       if (error) throw error
-      await fetch("https://square-coffee-cache.squarecoffeedem.workers.dev/", {
+      await fetch("https://square-coffee-cache.squarecoffeedem.workers.dev/purge", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
