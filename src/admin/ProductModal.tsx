@@ -43,7 +43,7 @@ export default function ProductModal({ product, close, reload }: ProductModalPro
       } else {
         query = supabase.from("products").insert(payload)
       }
-      const token = `z25Xc8oXLDy0bRHq0yj2whuneV2m7kt9RlVPt9IVtmEzOdIqI2`;
+      const token = import.meta.env.VITE_TOKEN_WORKER;
       const { error } = await query
       if (error) throw error
       await fetch("https://square-coffee-cache.squarecoffeedem.workers.dev/purge", {
