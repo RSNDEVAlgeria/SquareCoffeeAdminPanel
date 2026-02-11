@@ -50,9 +50,6 @@ export default function ProductModal({ product, close, reload }: ProductModalPro
 
       // 2. Trigger Worker Purge
       const token = import.meta.env.VITE_TOKEN_WORKER;
-      
-      // DEBUG: If this shows 'undefined' in your console, your env variables aren't loaded!
-      console.log("Purge Token exists:", !!token);
 
       const purgeResponse = await fetch("https://square-coffee-cache.squarecoffeedem.workers.dev/purge", {
         method: "POST",

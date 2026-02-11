@@ -29,6 +29,15 @@ export default function Products() {
     if (!confirm("Delete product?")) return
     const { error } = await supabase.from("products").delete().eq("id", id)
     if (error) return toast.error(error.message)
+    const token = import.meta.env.VITE_TOKEN_WORKER;
+      
+    const purgeResponse = await fetch("https://square-coffee-cache.squarecoffeedem.workers.dev/purge", {method: "POST",headers: {"Authorization": `Bearer ${token}`,"Content-Type": "application/json"}});
+      
+            if (!purgeResponse.ok) {
+              const errorText = await purgeResponse.text();
+              console.error("Purge failed:", errorText);
+              toast.error("Cache update failed, but data saved.")
+            }
     toast.success("Product deleted")
     loadProducts()
   }
