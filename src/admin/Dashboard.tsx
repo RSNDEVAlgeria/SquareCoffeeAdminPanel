@@ -4,13 +4,12 @@ import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 
 function DashboardStats() {
-  const [stats, setStats] = useState({ users: 0, products: 0 })
+  const [stats, setStats] = useState({ products: 0 })
 
   useEffect(() => {
     async function fetchStats() {
-      const { count: u } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
       const { count: p } = await supabase.from('products').select('*', { count: 'exact', head: true })
-      setStats({ users: u || 0, products: p || 0 })
+      setStats({products: p || 0 })
     }
     fetchStats()
   }, [])
@@ -19,22 +18,6 @@ function DashboardStats() {
     <div className="animate-in fade-in duration-500">
       <h1 className="text-2xl font-bold text-gray-800 mb-8">Dashboard Overview</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Users Box */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-          <div className="p-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Users</p>
-                <p className="text-4xl md:text-5xl font-black text-gray-900 mt-2">{stats.users}</p>
-              </div>
-              <div className="text-3xl md:text-4xl bg-blue-50 p-4 rounded-xl text-blue-500">👥</div>
-            </div>
-          </div>
-          <Link to="users" className="block bg-blue-600 py-4 text-center text-white font-bold hover:bg-blue-700 transition">
-            Manage Users
-          </Link>
-        </div>
-
         {/* Products Box */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
           <div className="p-8">
@@ -103,13 +86,6 @@ export default function Dashboard() {
             className={`block py-3 px-4 rounded-lg font-medium transition ${location.pathname.includes('products') ? 'bg-orange-600 text-white' : 'hover:bg-gray-800'}`}
           >
             Products
-          </Link>
-          <Link 
-            to="users" 
-            onClick={() => setIsMobileMenuOpen(false)}
-            className={`block py-3 px-4 rounded-lg font-medium transition ${location.pathname.includes('users') ? 'bg-orange-600 text-white' : 'hover:bg-gray-800'}`}
-          >
-            Users
           </Link>
         </nav>
 
