@@ -51,7 +51,7 @@ export default function ProductModal({ product, close, reload }: ProductModalPro
       // 2. Trigger Worker Purge
       const token = import.meta.env.VITE_TOKEN_WORKER;
 
-      const purgeResponse = await fetch("https://assets.squarecoffee.shop/purge", {
+      const purgeResponse = await fetch("https://squarecoffee.shop/api?purge=true", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
