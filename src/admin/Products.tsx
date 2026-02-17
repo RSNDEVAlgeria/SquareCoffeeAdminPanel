@@ -31,7 +31,7 @@ export default function Products() {
     if (error) return toast.error(error.message)
     const token = import.meta.env.VITE_TOKEN_WORKER;
       
-    const purgeResponse = await fetch("https://square-coffee-cache.squarecoffeedem.workers.dev/purge", {method: "POST",headers: {"Authorization": `Bearer ${token}`,"Content-Type": "application/json"}});
+    const purgeResponse = await fetch("https://assets.squarecoffee.shop/purge", {method: "POST",headers: {"Authorization": `Bearer ${token}`,"Content-Type": "application/json"}});
       
             if (!purgeResponse.ok) {
               const errorText = await purgeResponse.text();
